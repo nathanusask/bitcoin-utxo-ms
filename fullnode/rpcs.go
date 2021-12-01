@@ -121,12 +121,12 @@ func (s server) GetBestBlockHeight() int {
 		return -1
 	}
 
-	height, ok := result.(int)
+	heightF, ok := result.(float64)
 	if !ok {
-		log.Println("failed to cast result to integer")
+		log.Println("failed to cast result to float64 as result is ", result)
 		return -1
 	}
-	return height
+	return int(heightF)
 }
 
 func (s server) rpcCall(payload *Payload) interface{} {
