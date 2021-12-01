@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/ABMatrix/bitcoin-utxo-ms/api"
@@ -78,5 +79,9 @@ func main() {
 	utxoQuery := rounter.Group("/utxo")
 	utxoQuery.POST("list", apiServer.ListHandler)
 
-	rounter.Run(":18088")
+	httpServer := &http.Server{
+		Addr:    ":18088",
+		Handler: rounter,
+	}
+	log.Fatalln(httpServer.ListenAndServe()) // TODO: change it to HTTPS server
 }
