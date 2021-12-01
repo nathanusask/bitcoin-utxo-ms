@@ -145,7 +145,7 @@ func (s server) syncOneBlock(ctx context.Context, block *fullnode.Block, needWg 
 			})
 		}
 	}
-	var wgInside *sync.WaitGroup
+	wgInside := &sync.WaitGroup{}
 	wgInside.Add(1)
 	go func() {
 		defer wgInside.Done()
