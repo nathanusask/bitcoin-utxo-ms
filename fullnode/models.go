@@ -1,7 +1,5 @@
 package fullnode
 
-import "time"
-
 type ScriptType string
 
 const (
@@ -36,17 +34,17 @@ type TxOut struct {
 }
 
 type Transaction struct {
-	Txid     string    `json:"txid"`
-	Hash     string    `json:"hash"`
-	Version  int64     `json:"version"`
-	Size     int64     `json:"size"`
-	Vsize    int64     `json:"vsize"`
-	Weight   int64     `json:"weight"`
-	LockTime time.Time `json:"locktime"`
-	TxIns    []*TxIn   `json:"vin"`
-	TxOuts   []*TxOut  `json:"vout"`
-	Hex      string    `json:"hex"`
-	Fee      float64   `json:"fee,omitempty"`
+	Txid     string   `json:"txid"`
+	Hash     string   `json:"hash"`
+	Version  int64    `json:"version"`
+	Size     int64    `json:"size"`
+	Vsize    int64    `json:"vsize"`
+	Weight   int64    `json:"weight"`
+	LockTime int      `json:"locktime"`
+	TxIns    []*TxIn  `json:"vin"`
+	TxOuts   []*TxOut `json:"vout"`
+	Hex      string   `json:"hex"`
+	Fee      float64  `json:"fee,omitempty"`
 }
 
 type Block struct {
