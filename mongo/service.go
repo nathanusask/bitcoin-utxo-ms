@@ -76,14 +76,15 @@ func (s server) GetMaxHeight(ctx context.Context) int {
 }
 
 func (s server) DeleteMany(ctx context.Context, uniqueKeys []bson.M) error {
+	var writeModels []mongo.WriteModel
 	for _, key := range uniqueKeys {
-		_, err := s.collection.DeleteMany(ctx, key, &options.DeleteOptions{
-			Hint: MONGO_UTXO_KEY_INDEX_NAME,
-		})
-		if err != nil {
-			// report which keys failed and continue
-			log.Println(fmt.Sprintf("failed to delete %+v with error: %s", key, err.Error()))
+		deleteModel := &mongo.DeleteManyModel{
+			Filter: key,
+			Hint:   MONGO_UTXO_KEY_INDEX_NAME,
 		}
+		writeModels = append(writeModels, deleteModel)
 	}
-	return nil
+
+	_, err := s.collection.BulkWrite(ctx, writeModels)
+	return err
 }
