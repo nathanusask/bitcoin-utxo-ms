@@ -82,7 +82,7 @@ func (s server) syncBlockStartingAtHeight(ctx context.Context, height *int) {
 	for curBlock != nil {
 		// sync one block at a time
 		s.wg.Add(1)
-		go s.syncOneBlock(ctx, curBlock, true)
+		go s.syncOneBlock(ctx, curBlock)
 		*height++
 
 		// getting the next block takes some time and can run simultaneously alongside block syncing
@@ -104,10 +104,9 @@ func (s server) syncBlockStartingAtHeight(ctx context.Context, height *int) {
 	}
 }
 
-func (s server) syncOneBlock(ctx context.Context, block *fullnode.Block, needWg bool) {
-	if needWg {
-		defer s.wg.Done()
-	}
+func (s server) syncOneBlock(ctx context.Context, block *fullnode.Block) {
+	defer s.wg.Done()
+
 	if block == nil {
 		return
 	}
