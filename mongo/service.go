@@ -49,7 +49,7 @@ func (s server) ListCoinsForAddress(ctx context.Context, address string) ([]*UTX
 
 	cur, err := s.collection.Find(ctx, filter)
 	if err != nil {
-		log.Println(fmt.Sprintf("failed to find documents for %s with error: %s", address, err.Error()))
+		log.Println(fmt.Sprintf("[error] failed to find documents for %s with error: %s", address, err.Error()))
 		return nil, err
 	}
 
@@ -57,7 +57,7 @@ func (s server) ListCoinsForAddress(ctx context.Context, address string) ([]*UTX
 	for cur.Next(ctx) {
 		utxo := &UTXO{}
 		if err := bson.Unmarshal(cur.Current, &utxo); err != nil {
-			log.Println("failed to unmarshal utxo with error: ", err.Error())
+			log.Println("[error] failed to unmarshal utxo with error: ", err.Error())
 			return nil, err
 		}
 		utxos = append(utxos, utxo)
@@ -70,7 +70,7 @@ func (s server) GetMaxHeight(ctx context.Context) int {
 	cur := s.collection.FindOne(ctx, bson.M{}, &options.FindOneOptions{Sort: bson.M{KEY_HEIGHT: -1}})
 	utxo := &UTXO{}
 	if err := cur.Decode(&utxo); err != nil {
-		log.Println("failed to decode utxo with error: ", err.Error())
+		log.Println("[error] failed to decode utxo with error: ", err.Error())
 		return -1
 	}
 	return utxo.Height

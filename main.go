@@ -63,15 +63,15 @@ func main() {
 	// connect to MongoDB
 	mongoCli, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		log.Fatalln("failed to connect with error:", err)
+		log.Fatalln("[error] failed to connect mongo with error:", err)
 	}
 	// check connection
 	err = mongoCli.Ping(ctx, nil)
 	if err != nil {
-		log.Fatalln("failed to ping mongodb with error: ", err)
+		log.Fatalln("[error] failed to ping mongodb with error: ", err)
 	}
 
-	log.Println("mongo connection is OK...")
+	log.Println("[debug] mongo connection is OK...")
 
 	btcServer := fullnode.New(btcUri)
 	mongoServer := _mongo.New(mongoCli, btcDatabase, utxoCollection)

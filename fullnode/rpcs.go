@@ -48,16 +48,16 @@ func (s server) GetBlockAtHeight(height int) *Block {
 
 	result := s.rpcCall(payload)
 	if result == nil {
-		log.Println("rpc call to get block hash has failed!")
+		log.Println("[error] rpc call to get block hash has failed!")
 		return nil
 	}
 
 	blockHash, ok := result.(string)
 	if !ok {
-		log.Println("failed to cast result to string")
+		log.Println("[error] failed to cast result to string")
 		return nil
 	}
-	log.Printf("block hash at height %d is %s\n", height, blockHash)
+	log.Printf("[debug] block hash at height %d is %s\n", height, blockHash)
 
 	return s.GetBlock(blockHash)
 }
@@ -70,13 +70,13 @@ func (s server) GetBestBlock() *Block {
 
 	result := s.rpcCall(payload)
 	if result == nil {
-		log.Println("rpc call to get best block hash has failed!")
+		log.Println("[error] rpc call to get best block hash has failed!")
 		return nil
 	}
 
 	blockHash, ok := result.(string)
 	if !ok {
-		log.Println("failed to case result in to string")
+		log.Println("[error] failed to case result in to string")
 		return nil
 	}
 
@@ -91,7 +91,7 @@ func (s server) GetBlock(hash string) *Block {
 
 	result := s.rpcCall(payload)
 	if result == nil {
-		log.Println("rpc call to get best block hash has failed!")
+		log.Println("[error] rpc call to get best block hash has failed!")
 		return nil
 	}
 
@@ -111,13 +111,13 @@ func (s server) GetBestBlockHeight() int {
 
 	result := s.rpcCall(payload)
 	if result == nil {
-		log.Println("rpc call to get best block hash has failed!")
+		log.Println("[error] rpc call to get best block hash has failed!")
 		return -1
 	}
 
 	heightF, ok := result.(float64)
 	if !ok {
-		log.Println("failed to cast result to float64 as result is ", result)
+		log.Println("[error] failed to cast result to float64 as result is ", result)
 		return -1
 	}
 	return int(heightF)
@@ -136,7 +136,7 @@ func (s server) rpcCall(payload *Payload) interface{} {
 
 	marshaled, err := json.Marshal(payload)
 	if err != nil {
-		log.Println("failed to marshal payload with error: ", err.Error())
+		log.Println("[error] failed to marshal payload with error: ", err.Error())
 		return nil
 	}
 
@@ -144,32 +144,32 @@ func (s server) rpcCall(payload *Payload) interface{} {
 
 	req, err := http.NewRequest(http.MethodPost, url, reader)
 	if err != nil {
-		log.Println("failed to initialize a new request with error: ", err.Error())
+		log.Println("[error] failed to initialize a new request with error: ", err.Error())
 		return nil
 	}
 	req.Header.Add(KEY_CONTENT_TYPE, CONTENT_TYPE_TEXT_PLAIN)
 
 	res, err := s.httpClient.Do(req)
 	if err != nil {
-		log.Println("failed to send post request with error: ", err.Error())
+		log.Println("[error] failed to send post request with error: ", err.Error())
 		return nil
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Println("failed to read body with error: ", err.Error())
+		log.Println("[error] failed to read body with error: ", err.Error())
 		return nil
 	}
 
 	response := &Response{}
 	if err := json.Unmarshal(body, &response); err != nil {
-		log.Println("failed to unmarshal response with error: ", err.Error())
+		log.Println("[error] failed to unmarshal response with error: ", err.Error())
 		return nil
 	}
 
 	if response.Error != nil {
-		log.Printf("unsuccessful request:\nerror code: %d\nmessage: %s\n", response.Error.Code, response.Error.Message)
+		log.Printf("[warning] unsuccessful request:\terror code: %d\tmessage: %s\n", response.Error.Code, response.Error.Message)
 		return nil
 	}
 

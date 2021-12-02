@@ -52,7 +52,7 @@ func New(m mongo.Interface, f fullnode.Interface) Interface {
 func (s server) Start(ctx context.Context) {
 	maxHeightInDatabase := s.mongoServer.GetMaxHeight(ctx)
 	if maxHeightInDatabase < 0 {
-		log.Println("failed to get max height from database")
+		log.Println("[error] failed to get max height from database")
 		return
 	}
 
