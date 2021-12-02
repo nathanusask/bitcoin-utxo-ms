@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -19,7 +20,7 @@ const (
 	KEY_AMOUNT  = "amount"
 	KEY_GT      = "$gt"
 
-	MONGO_UTXO_KEY_INDEX_NAME = "_utxo_key_index"
+	ENV_MONGO_UTXO_KEY_INDEX_NAME = "MONGO_UTXO_KEY_INDEX_NAME"
 )
 
 type server struct {
@@ -80,7 +81,9 @@ func (s server) DeleteMany(ctx context.Context, uniqueKeys []bson.M) error {
 	for _, key := range uniqueKeys {
 		deleteModel := &mongo.DeleteManyModel{
 			Filter: key,
-			Hint:   MONGO_UTXO_KEY_INDEX_NAME,
+		}
+		if utxoKeyIndex := os.Getenv(ENV_MONGO_UTXO_KEY_INDEX_NAME); utxoKeyIndex != "" {
+			deleteModel.SetHint(utxoKeyIndex)
 		}
 		writeModels = append(writeModels, deleteModel)
 	}
