@@ -14,7 +14,7 @@ import (
 const (
 	KEY_ADDRESS = "address"
 	KEY_HEIGHT  = "height"
-	KEY_TXID    = "txid"
+	KEY_TXID    = "tx_id"
 	KEY_VOUT    = "vout"
 	KEY_AMOUNT  = "amount"
 	KEY_GT      = "$gt"
