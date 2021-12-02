@@ -57,7 +57,7 @@ func (s server) Start(ctx context.Context) {
 	}
 
 	height := maxHeightInDatabase + 1
-	s.syncBlockAtHeight(ctx, &height)
+	s.syncBlockStartingAtHeight(ctx, &height)
 	log.Println("[debug] all blocks have been synced before ", height)
 
 	ticker := time.NewTicker(INTERVAL)
@@ -68,16 +68,16 @@ func (s server) Start(ctx context.Context) {
 			case <-ticker.C:
 				height := s.fullnode.GetBestBlockHeight()
 				if height >= currentHeight {
-					s.syncBlockAtHeight(ctx, &currentHeight)
+					s.syncBlockStartingAtHeight(ctx, &currentHeight)
 				}
 			}
 		}
 	}(height)
 }
 
-// syncBlockAtHeight is a blocking method
+// syncBlockStartingAtHeight is a blocking method
 // the returned `height` is the height of the next block which hasn't arrived yet
-func (s server) syncBlockAtHeight(ctx context.Context, height *int) {
+func (s server) syncBlockStartingAtHeight(ctx context.Context, height *int) {
 	curBlock := s.fullnode.GetBlockAtHeight(*height)
 	for curBlock != nil {
 		// sync one block at a time
