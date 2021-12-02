@@ -18,6 +18,8 @@ const (
 	KEY_VOUT    = "vout"
 	KEY_AMOUNT  = "amount"
 	KEY_GT      = "$gt"
+
+	MONGO_UTXO_KEY_INDEX_NAME = "_utxo_key_index"
 )
 
 type server struct {
@@ -75,7 +77,9 @@ func (s server) GetMaxHeight(ctx context.Context) int {
 
 func (s server) DeleteMany(ctx context.Context, uniqueKeys []bson.M) error {
 	for _, key := range uniqueKeys {
-		_, err := s.collection.DeleteMany(ctx, key)
+		_, err := s.collection.DeleteMany(ctx, key, &options.DeleteOptions{
+			Hint: MONGO_UTXO_KEY_INDEX_NAME,
+		})
 		if err != nil {
 			// report which keys failed and continue
 			log.Println(fmt.Sprintf("failed to delete %+v with error: %s", key, err.Error()))
