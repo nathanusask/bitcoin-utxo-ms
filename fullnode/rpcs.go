@@ -1,6 +1,7 @@
 package fullnode
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -95,16 +96,9 @@ func (s server) GetBlock(hash string) *Block {
 	}
 
 	block := &Block{}
-	bytes, err := json.Marshal(result)
-	if err != nil {
-		log.Println("failed to marshal results with error: ", err.Error())
-		return nil
-	}
-
-	if err := json.Unmarshal(bytes, &block); err != nil {
-		log.Println("failed to unmarshal bytes to block with error: ", err.Error())
-		return nil
-	}
+	buf := &bytes.Buffer{}
+	json.NewEncoder(buf).Encode(result)
+	json.NewDecoder(buf).Decode(block)
 
 	return block
 }
