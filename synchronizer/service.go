@@ -114,6 +114,7 @@ func (s server) syncOneBlock(ctx context.Context, block *fullnode.Block) {
 	defer log.Println(fmt.Sprintf("[debug] exiting syncing block at height %d...", block.Height))
 	var deleteKeys []bson.M
 	var insertUtxos []*mongo.UTXO
+	log.Println("[debug] looping over transactions in block #", block.Height)
 	for index, transaction := range block.Transactions {
 		if transaction == nil {
 			continue
@@ -163,23 +164,28 @@ func (s server) syncOneBlock(ctx context.Context, block *fullnode.Block) {
 			})
 		}
 	}
+	log.Println("[debug] finished looping over transactions in block #", block.Height)
 	wgInside := &sync.WaitGroup{}
 	wgInside.Add(1)
 	go func() {
 		defer wgInside.Done()
 
+		log.Println("[debug] started deleting spent UTXOs for block #", block.Height)
 		if err := s.mongoServer.DeleteMany(ctx, deleteKeys); err != nil {
 			log.Println("[error] failed to delete many with error: ", err.Error())
 		}
+		log.Println("[debug] finished deleting spent UTXOs for block #", block.Height)
 	}()
 
 	wgInside.Add(1)
 	go func() {
 		defer wgInside.Done()
 
+		log.Println("[debug] started adding new UTXOs for block #", block.Height)
 		if err := s.mongoServer.InsertMany(ctx, insertUtxos); err != nil {
 			log.Println("[error] failed to insert many with error: ", err.Error())
 		}
+		log.Println("[debug] finished adding new UTXOs for block #", block.Height)
 	}()
 
 	wgInside.Wait()
