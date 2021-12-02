@@ -1,0 +1,29 @@
+version: "3"
+services:
+  btc-utxo-ms-dev-testnet:
+    build: .
+    env_file:
+      - ./dev-testnet.env
+    ports:
+      - "29088:29088"
+
+  btc-utxo-ms-dev-mainnet:
+    build: .
+    env_file:
+      - ./dev-mainnet.env
+    ports:
+      - "28088:28088"
+
+  btc-utxo-ms-prod-testnet:
+    build: .
+    env_file:
+      - ./prod-testnet.env
+    ports:
+      - "19088:19088"
+
+  btc-utxo-ms-prod-mainnet:
+    build: .
+    env_file:
+      - ./prod-mainnet.env
+    ports:
+      - "18088:18088"
