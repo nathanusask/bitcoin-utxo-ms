@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -25,6 +26,7 @@ const (
 	ENV_BTC_DATABASE_NAME    = "BTC_DATABASE_NAME"
 	ENV_UTXO_COLLECTION_NAME = "UTXO_COLLECTION_NAME"
 	ENV_MONGO_URI            = "MONGO_URI"
+	ENV_PORT                 = "PORT"
 )
 
 func main() {
@@ -46,6 +48,11 @@ func main() {
 	utxoCollection := os.Getenv(ENV_UTXO_COLLECTION_NAME)
 	if utxoCollection == "" {
 		log.Fatalln(ENV_UTXO_COLLECTION_NAME, " is unset!")
+	}
+
+	port := os.Getenv(ENV_PORT)
+	if port == "" {
+		log.Fatalln(ENV_PORT, " is unset!")
 	}
 
 	ctx := context.Background()
@@ -72,16 +79,16 @@ func main() {
 	syncer.Start(ctx) // this is a blocking process!!
 
 	// initialize gin web server
-	rounter := gin.Default()
-	rounter.Use(middleware.Cors())
+	router := gin.Default()
+	router.Use(middleware.Cors())
 
 	apiServer := api.New(mongoCli, btcDatabase, utxoCollection)
-	utxoQuery := rounter.Group("/utxo")
+	utxoQuery := router.Group("/utxo")
 	utxoQuery.POST("list", apiServer.ListHandler)
 
 	httpServer := &http.Server{
-		Addr:    ":18088",
-		Handler: rounter,
+		Addr:    fmt.Sprintf(":%s", port),
+		Handler: router,
 	}
 	log.Fatalln(httpServer.ListenAndServe()) // TODO: change it to HTTPS server
 }
