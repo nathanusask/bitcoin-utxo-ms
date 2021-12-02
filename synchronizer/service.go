@@ -57,13 +57,8 @@ func (s server) Start(ctx context.Context) {
 	}
 
 	height := maxHeightInDatabase + 1
-	curBlock := s.fullnode.GetBlockAtHeight(height)
-	for curBlock != nil {
-		s.wg.Add(1)
-		go s.syncOneBlock(ctx, curBlock, true)
-		height++
-		curBlock = s.fullnode.GetBlockAtHeight(height)
-	}
+	s.syncBlockAtHeight(ctx, &height)
+	log.Println("[debug] all blocks have been synced before ", height)
 
 	ticker := time.NewTicker(INTERVAL)
 	go func(initialHeight int) {
@@ -72,17 +67,41 @@ func (s server) Start(ctx context.Context) {
 			select {
 			case <-ticker.C:
 				height := s.fullnode.GetBestBlockHeight()
-				for height > currentHeight {
-					go s.syncOneBlock(ctx, s.fullnode.GetBlockAtHeight(currentHeight), false)
-					currentHeight++
+				if height >= currentHeight {
+					s.syncBlockAtHeight(ctx, &currentHeight)
 				}
-			case <-ctx.Done():
-				return
 			}
 		}
 	}(height)
+}
 
-	s.wg.Wait() // this only waits on
+// syncBlockAtHeight is a blocking method
+// the returned `height` is the height of the next block which hasn't arrived yet
+func (s server) syncBlockAtHeight(ctx context.Context, height *int) {
+	curBlock := s.fullnode.GetBlockAtHeight(*height)
+	for curBlock != nil {
+		// sync one block at a time
+		s.wg.Add(1)
+		go s.syncOneBlock(ctx, curBlock, true)
+		*height++
+
+		// getting the next block takes some time and can run simultaneously alongside block syncing
+		if curBlock.NextBlockHash != "" {
+			s.wg.Add(1)
+			go func() {
+				defer s.wg.Done()
+				curBlock = s.fullnode.GetBlock(curBlock.NextBlockHash)
+			}()
+			s.wg.Wait()
+			continue
+		}
+		s.wg.Add(1)
+		go func() {
+			defer s.wg.Done()
+			curBlock = s.fullnode.GetBlockAtHeight(*height)
+		}()
+		s.wg.Wait()
+	}
 }
 
 func (s server) syncOneBlock(ctx context.Context, block *fullnode.Block, needWg bool) {
